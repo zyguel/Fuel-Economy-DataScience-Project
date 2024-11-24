@@ -1,0 +1,7 @@
+Sr. No.,Table Name,Table Type,Row Count (Approx),Physical Size (Approx)
+1,Dim_Year,Dimension,12,0.0 MB
+2,Dim_Make,Dimension,63,0.001 MB
+3,Dim_Model,Dimension,2924,0.123 MB
+4,Dim_Engine,Dimension,162,0.004 MB
+5,Fact_Vehicle_Efficiency,Fact,15040,0.676 MB
+,Total,,,0.804 MB
