@@ -13,7 +13,7 @@ print("Initial shape:", vehicle_df.shape)
 print(vehicle_df.head())
 
 # Filter data for the years 2014 to 2024
-vehicle_df = vehicle_df[(vehicle_df['year'] >= 2014) & (vehicle_df['year'] <= 2025)]
+vehicle_df = vehicle_df[(vehicle_df['year'] >= 2013) & (vehicle_df['year'] <= 2025)]
 print("After year filtering:", vehicle_df.shape)
 print(vehicle_df.head())
 
@@ -67,5 +67,5 @@ print("After feature engineering:", vehicle_df.shape)
 print(vehicle_df.head())
 
 # Save cleaned data to the same directory as vehicle.csv
-vehicle_df.to_csv(r'X:\Data-Mining-Project\Fuel-Economy-DataScience-Project\csv\cleaned_vehicle.csv', index=False)  # or 'X:/Data-Mining-Project/cleaned_vehicle.csv'
+vehicle_df.to_csv(r'X:\Data-Mining-Project\Fuel-Economy-DataScience-Project\csv\cleaned_vehicleII.csv', index=False)  # or 'X:/Data-Mining-Project/cleaned_vehicle.csv'
 print("Final shape of cleaned data:", vehicle_df.shape)

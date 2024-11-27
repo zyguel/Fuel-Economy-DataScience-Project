@@ -15,14 +15,13 @@ engine = create_engine(connection_string)
 # Query to get the required data from the fact and dimension tables
 query = '''
     SELECT 
-        mf.manufacturer_name,
+        dm.make AS manufacturer_name,
         fe.average_mpg,
-        y.year
+        dy.year
     FROM fact_vehicle_efficiency fe
-    JOIN dim_vehicle dv ON fe.vehicle_id = dv.vehicle_id
-    JOIN dim_manufacturer mf ON dv.manufacturer_id = mf.manufacturer_id
-    JOIN dim_year y ON fe.year_id = y.year_id
-    WHERE y.year BETWEEN 2014 AND 2024
+    JOIN dim_make dm ON fe.make_id = dm.make_id
+    JOIN dim_year dy ON fe.year_id = dy.year_id
+    WHERE dy.year BETWEEN 2014 AND 2024
 '''
 
 # Execute the query and load the data into a DataFrame
