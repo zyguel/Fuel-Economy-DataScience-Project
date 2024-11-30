@@ -1,0 +1,132 @@
+q1. What is the average fuel cost and CO₂ emissions across all vehicles in the datasets by year?
+
+Purpose: Summarize trends in fuel cost and environmental impact over time.
+Visual: Line chart or bar chart comparing yearly averages.
+
+SELECT 
+    YEAR(Date) AS Year,   -- Replace 'YourDateColumn' with the correct date column
+    AVG(FuelCost) AS AvgFuelCost,   -- Replace 'YourFuelCostColumn' with the correct column
+    AVG(CO2Emissions) AS AvgCO2Emissions  -- Replace 'YourCO2EmissionsColumn' with the correct column
+FROM 
+    FactFuelEconomy
+GROUP BY 
+    YEAR(Date)
+ORDER BY 
+    Year;
+
+q2.Which manufacturers have the highest average fuel economy (Combined MPG) across their vehicle lineup, and how does this compare with their competitors?
+Purpose: Identify top-performing manufacturers in terms of fuel efficiency.
+Visual: Horizontal bar chart showing top manufacturers by average MPG.
+
+
+SELECT 
+    d.make AS Manufacturer,
+    AVG(f.CombinedMPG) AS AvgCombinedMPG
+FROM 
+    FactFuelEconomy f
+JOIN 
+    DimVehicle d ON f.VehicleID = d.VehicleID  -- Replace 'vehicle_id' with the actual common column
+GROUP BY 
+    d.make
+ORDER BY 
+    AvgCombinedMPG DESC;
+
+
+q3. How does the average fuel cost of each fuel type (e.g., Regular, Diesel) rank over time, and what trends can we observe?
+Purpose: Rank fuel types by cost to analyze trends over time.
+Visual: Line chart with ranking overlay or grouped rank-based summary table.
+
+
+WITH FuelRank AS (
+    SELECT 
+        FuelType,
+        Date,
+        AVG(FuelPrice) AS AvgFuelPrice,
+        RANK() OVER (PARTITION BY FuelType ORDER BY Date) AS FuelRank
+    FROM 
+        DimFuel
+    GROUP BY 
+        FuelType, Date
+)
+SELECT 
+    FuelType,
+    Date,
+    AvgFuelPrice,
+    FuelRank
+FROM 
+    FuelRank
+ORDER BY 
+    Date, FuelType;
+
+
+q4. What is the distribution of vehicle types (e.g., Two-Seaters, SUVs) across manufacturers and their average emissions?
+
+Purpose: Analyze emissions performance within a hierarchical structure (vehicle type > manufacturer).
+Visual: Treemap or grouped bar chart showing average emissions by manufacturer and vehicle class.
+
+
+SELECT 
+    d.make AS Manufacturer,
+    AVG(e.score) AS AvgEmissionsScore
+FROM 
+    DimVehicle d
+JOIN 
+    FactFuelEconomy f ON d.VehicleID = f.VehicleID
+JOIN 
+    DimEmissions e ON d.VehicleID = e.VehicleID
+GROUP BY 
+    d.make
+ORDER BY 
+    AvgEmissionsScore DESC;
+
+
+Additional Business Questions (from Above Reports)
+Question: How has the average fuel economy (Combined MPG) for each vehicle class changed over time across all manufacturers?
+Purpose: Understand how vehicle types (e.g., SUVs, sedans) are evolving in terms of fuel economy, identifying trends in improvements or deteriorations in fuel efficiency.
+Visual: Line chart or grouped bar chart comparing average MPG over time by vehicle class.
+
+SELECT 
+    YEAR(f.Date) AS Year,
+    v.VehicleClass AS VehicleClass,
+    AVG(f.CombinedMPG) AS AvgCombinedMPG
+FROM 
+    FactFuelEconomy f
+JOIN 
+    DimVehicle v ON f.VehicleID = v.VehicleID
+GROUP BY 
+    YEAR(f.Date), v.VehicleClass
+ORDER BY 
+    Year, VehicleClass;
+
+Question: Which vehicle classes have shown the greatest improvement in reducing CO₂ emissions per mile over the last 5 years?
+Purpose: Identify which vehicle classes have been most successful in reducing their environmental impact, helping target areas for further environmental policy focus.
+Visual: Line chart showing percentage reduction in emissions for each vehicle class, with a focus on the top performers.
+
+
+WITH EmissionsByYear AS (
+    SELECT 
+        YEAR(f.Date) AS Year,
+        v.VehicleClass AS VehicleClass,
+        AVG(f.CO2Emissions) AS AvgCO2Emissions
+    FROM 
+        FactFuelEconomy f
+    JOIN 
+        DimVehicle v ON f.VehicleID = v.VehicleID
+    WHERE 
+        YEAR(f.Date) >= YEAR(GETDATE()) - 5
+    GROUP BY 
+        YEAR(f.Date), v.VehicleClass
+)
+SELECT 
+    e1.VehicleClass,
+    ((e1.AvgCO2Emissions - e2.AvgCO2Emissions) / e2.AvgCO2Emissions) * 100 AS PercentageReduction
+FROM 
+    EmissionsByYear e1
+JOIN 
+    EmissionsByYear e2 ON e1.VehicleClass = e2.VehicleClass 
+    AND e1.Year = e2.Year + 5
+ORDER BY 
+    PercentageReduction DESC;
+
+
+
